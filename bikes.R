@@ -1,3 +1,4 @@
+############DATA IMPORTING
 library(readxl)
 dp_deseti <- read_xlsx("2021_10.xlsx")
 dp_jedanest <- read_xlsx("2021_11.xlsx")
@@ -13,21 +14,15 @@ dd_osmi <- read_xlsx("2022_08.xlsx")
 dd_deveti <- read_xlsx("2022_09.xlsx")
 dd_deseti <- read_xlsx("2022_10.xlsx")
 
-#install.packages("rlang")
-#library(rlang)
 
 library(tidyverse)
 library(dplyr)
 
-#df_list <- list(dp_deseti, dp_jedanest, dp_dvanesti, dd_prvi, dd_drugi, dd_treci, dd_cet, dd_pet, dd_sesti, dd_sedmi, dd_osmi, dd_deveti, dd_deseti)
-#
+###################DATA CLEANING AND FORMATING
 dp_deseti <- dp_deseti %>% rename(ride_time = ride_lenght)
-
-last_12_months <- union_all(dp_deseti, dp_jedanest, dp_dvanesti, dd_prvi, dd_drugi, dd_treci, dd_cet, dd_pet, dd_sesti, dd_sedmi, dd_osmi, dd_deveti, dd_deseti)
 
 last_12_months %>% group_by(member_casual) %>% count(member_casual) 
 
-####################################33
 last_12_months_all <- union_all(dp_deseti, dp_jedanest, dp_dvanesti, dd_prvi, dd_drugi, dd_treci, dd_cet, dd_pet, dd_sesti, dd_sedmi, dd_osmi, dd_deveti, dd_deseti)
 
 last_12_months_all$ride_hours <- format(as.POSIXct(last_12_months_all$ride_time), format = "%H")
@@ -47,9 +42,10 @@ last_12_months_all$ride_time <- last_12_months_all$ride_time/60
 
 last_12_months_all <- last_12_months_all[last_12_months_all$ride_time != 0,]
 
+
+
+######DATA FILTERING AND VISUALISATION
 ggplot(last_12_months_all) + aes(x = ride_time) + geom_histogram(aes(fill = member_casual )) + ggtitle("Ride Time - Member vs. Casual")
-
-
 
 
 last_12_months_all  %>% group_by(member_casual) %>% summarise(mean(ride_time), max(ride_time), mean(day_of_week), min(ride_time))
@@ -118,13 +114,7 @@ last_12_months %>% group_by(member_casual) %>% count(member_casual) %>% ggplot(a
                                                                              plot.title = element_text(hjust = 0.5, color = "#666666"))
 
 
-##########################3best months
-last_12_months_all$started_at <- as.Date(last_12_months_all$started_at)
-last_12_months_all$month <- format(as.POSIXct(last_12_months_all$started_at), format = "%d/%m/%Y")
-last_12_months_all$started_at <- substr(last_12_months_all$started_at, 1, 10)
 
-format(last_12_months_all$started_at)
-str(last_12_months_all$started_at)
-
+#best stations
 x <- last_12_months_all %>% group_by(start_station_name) %>% count(start_station_name) %>% arrange(-n)
 head(x,13)
